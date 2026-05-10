@@ -1,0 +1,7 @@
+*.mp3
+*.wav
+*.txt
+separated/
+venv/
+__pycache__/
+*.db
