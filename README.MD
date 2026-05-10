@@ -20,7 +20,7 @@ This is not just a tech project. It is an act of cultural preservation.
 
 --- 
 
-#How It Works
+# How It Works
 
 Bol uses a four-phase pipeline to go from raw audio to verified, searchable lyrics.
 
