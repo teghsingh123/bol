@@ -1,11 +1,13 @@
-import whisper
+from faster_whisper import WhisperModel # changed from openai whisper to faster which has same accuracy but 4 x faster and less memory
 import subprocess
 import os
 import sys
 
+from database import save_track
 
 
-#separate the vocals usiing demucs
+
+#separate the vocals using demucs
 #demucs works in the command line so we use the built in python module subprocess
 
 
@@ -33,21 +35,28 @@ def transcribe(vocals_path):
     #warnings.warn("FP16 is not supported on CPU; using FP32 instead")
     #Lyrics saved to testsong_lyrics.txt
 
-    model = whisper.load_model("large-v3") 
+    model_size = "medium"
+
+    model = WhisperModel(model_size_or_path=model_size, device="cpu", compute_type="int8")
     
 
     print("Transcribing...")
-    result = model.transcribe(vocals_path, language="pa") # pa = Punjabi
+    segments, info = model.transcribe(vocals_path, language="pa") # pa = Punjabi
+
+    #progess bar to see if its actually working lol
+    result = []
+    for segment in segments:
+        print(f"[{int(segment.start // 60):02d}:{int(segment.start % 60):02d}] {segment.text.strip()}")
+        result.append(segment)
 
     return result
-
 
 #save the lyrics into a text file
 def save_lyrics(result, output_path):
     with open(output_path, "w", encoding="utf-8") as f:
-        for segment in result["segments"]:
-            start = segment["start"]
-            text = segment["text"].strip()
+        for segment in result:
+            start = segment.start
+            text = segment.text.strip()
             minutes = int(start // 60)
             seconds = int(start % 60)
             f.write(f"[{minutes:02d}:{seconds:02d}] {text}\n") #write when each line starts
@@ -67,5 +76,11 @@ if __name__ == "__main__":
     vocals_path = separate_vocals(audio_path)
     result = transcribe(vocals_path)
 
+    lyrics_text = ""
+    for segment in result:
+        lyrics_text += segment.text.strip() + "\n" # type: ignore   
+
+    
     save_lyrics(result, f"{track_name}_lyrics.txt")
+    save_track(track_name, None, None, lyrics_text)
 
