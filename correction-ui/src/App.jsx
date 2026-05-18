@@ -1,4 +1,4 @@
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useInsertionEffect, useRef, useState } from "react";
 
 function App() {
   const [isPLaying, setIsPlaying] = useState(false);
@@ -6,6 +6,10 @@ function App() {
   const [lyrics, setLyrics] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null); //null = read mode, some number = write mode for that line
   const [editText, setEditText] = useState(""); //text to be edited
+
+  const [title, setTitle] = useState("");
+  const [artist, setArtist] = useState("");
+  const [year, setYear] = useState("");
 
   const audioRef = useRef(null);
   const lineRefs = useRef([]) //array of refs for each lyric line, used to scroll the active line into view
@@ -82,9 +86,43 @@ function App() {
   return (
     <div>
       <h1>Bol - Correction UI</h1>
-      <input type="file" accept=".txt" onChange={handleFileUpload}/>
-      <input type="file" accept=".mp3" onChange={handleAudioUpload} />
-      <audio ref={audioRef} controls onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)} />
+      <div style={{display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem" }}>
+        <input 
+          type="text" 
+          placeholder="Title" 
+          onChange={e => setTitle(e.target.value)}/>
+
+        <input 
+          type="text" 
+          placeholder="Artist" 
+          onChange={e => setArtist(e.target.value)}/>
+
+        <input 
+          type="text" 
+          placeholder="Year" 
+          onChange={e => setYear(e.target.value)}/>
+      </div>
+
+      <div style={{display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem" }}>
+        <input 
+          type="file" 
+          accept=".txt" 
+          onChange={handleFileUpload}/>
+
+        <input 
+          type="file" 
+          accept=".mp3" 
+          onChange={handleAudioUpload} />
+      </div>
+      
+
+      <div style={{ marginTop: "2rem" }}>
+        <audio 
+          ref={audioRef} 
+          controls 
+          onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)} />
+      </div>
+      
       {/* Loop through lyrics array and render a div for each line. Use key=index to assign a unique key to each item in the list. */}
       {lyrics.map((line, index) => (
         //if the line is active, double the font size and set opacity to 1
@@ -116,7 +154,7 @@ function App() {
               </span>}
         </div>
       ))}
-      <button onClick={() => exportLyrics(lyrics)}> Export Lyrics</button>
+      <button onClick={() => exportLyrics(lyrics, title, artist, year)}> Export Lyrics</button>
     </div>
   )
 }
@@ -141,7 +179,7 @@ function parseLyrics(text) {
 
 //Export the corrected lyrics back to a txt file
 
-function exportLyrics(lyrics) {
+function exportLyrics(lyrics, title, artist, year) {
   
   //convert start back to minutes and seconds
   const text = lyrics.map(line => {
@@ -168,9 +206,9 @@ function exportLyrics(lyrics) {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
-      title: "unknown",
-      artist: null,
-      year: null,
+      title: title,
+      artist: artist,
+      year: year,
       lyrics: text
     })
   })
