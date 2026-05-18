@@ -154,6 +154,8 @@ function exportLyrics(lyrics) {
   }).join("\n"); //join by new line.
 
   //create the txt file using Blob
+  
+  
   const blob = new Blob([text], {type: "text/plain"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -162,6 +164,16 @@ function exportLyrics(lyrics) {
   a.click();
   URL.revokeObjectURL(url);
 
+  fetch("http://127.0.0.1:5000/save", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      title: "unknown",
+      artist: null,
+      year: null,
+      lyrics: text
+    })
+  })
 }
 
 export default App

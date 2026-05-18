@@ -1,5 +1,3 @@
-*.db
-database.py
 venv/
 __pycache__/
 correction-ui/node_modules
