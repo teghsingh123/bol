@@ -1,4 +1,5 @@
-bol.db
+*.db
 venv/
 __pycache__/
 correction-ui/node_modules
+browse-ui/node_modules
